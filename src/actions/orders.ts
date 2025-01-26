@@ -76,3 +76,16 @@ export const getMonthlyOrders = async () => {
     orders: ordersByMonth[month],
   }))
 }
+
+
+// create
+// or replace function public.handle_new_user () returns trigger as $$
+// begin
+//   if new.raw_user_meta_data->>'avatar_url' is null or new.    raw_user_meta_data->>'avatar_url' = '' then
+//   new.raw_user_meta_data = jsonb_set(new.raw_user_meta_data,'{avatar_url}','"https://xsgames.co/randomusers/avatar.php?g=male"'::jsonb);
+//   end if;
+//   insert into public.users (id, email, avatar_url)
+//   values (new.id, new.email, new.raw_user_meta_data->>'avatar_url');
+//   return new;
+// end;
+// $$ language plPgsqlsecurity definer
