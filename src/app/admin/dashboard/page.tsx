@@ -34,7 +34,7 @@ const Dashboard = async () => {
       icon: TrendingUp,
       title: "Sales Analytics",
       description: "Gain insights into your business performance.",
-      link: "/admin/dashboard",
+      link: "/admin/sales",
     },
   ];
 
