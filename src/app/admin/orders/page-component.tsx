@@ -29,7 +29,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 
-import { OrdersWithProducts } from '@/app/admin/orders/types'
+import { OrdersWithProducts } from './types'
 import { updateOrderStatus } from '@/actions/orders'
 
 const statusOptions = ['Pending', 'Shipped', 'InTransit', 'Completed']
@@ -40,7 +40,7 @@ type Props = {
 
 type OrderedProducts = {
   order_id: number
-  product: number & {
+  product: {
     category: number
     created_at: string
     heroImage: string
@@ -72,23 +72,23 @@ export default function PageComponent({ ordersWithProducts }: Props) {
 
   return (
     <div className='container mx-auto p-6'>
-       <h1 className='text-2xl font-bold mb-6'>Orders Management Dashboard</h1>
-       <Table>
-         <TableHeader>
-           <TableRow>
-             <TableHead>ID</TableHead>
-             <TableHead>Created At</TableHead>
-             <TableHead>Status</TableHead>
-             <TableHead>Description</TableHead>
-             <TableHead>User</TableHead>
-             <TableHead>Slug</TableHead>
-             <TableHead>Total Price</TableHead>
-             <TableHead>Products</TableHead>
-             <TableHead>Actions</TableHead>
-           </TableRow>
-         </TableHeader>
-         <TableBody>
-           {ordersWithProducts.map((order) => (
+      <h1 className='text-2xl font-bold mb-6'>Orders Management Dashboard</h1>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>User</TableHead>
+            <TableHead>Slug</TableHead>
+            <TableHead>Total Price</TableHead>
+            <TableHead>Products</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {ordersWithProducts.map((order) => (
             <TableRow key={order.id}>
               <TableCell>{order.id}</TableCell>
               <TableCell>
@@ -127,9 +127,20 @@ export default function PageComponent({ ordersWithProducts }: Props) {
                       variant='outline'
                       size='sm'
                       onClick={openProductsModal(
-                        orderedProducts.filter(
-                          (item) => item.order_id === order.id
-                        )
+                        order.order_items.map((item) => ({
+                          order_id: order.id,
+                          product: {
+                            id: item.product.id,
+                            category: item.product.category,
+                            created_at: item.product.created_at,
+                            heroImage: item.product.heroImage,
+                            imagesUrl: item.product.imagesUrl,
+                            maxQuantity: item.product.maxQuantity,
+                            price: item.product.price,
+                            slug: item.product.slug,
+                            title: item.product.title,
+                          },
+                        }))
                       )}
                     >
                       View Products

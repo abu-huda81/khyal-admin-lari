@@ -3,8 +3,9 @@
 import { createClient } from '@/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendNotification } from './notifications'
+import { OrdersWithProducts } from '@/app/admin/orders/types'
 
-export const getOrdersWithProducts = async () => {
+export const getOrdersWithProducts = async (): Promise<OrdersWithProducts[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('order')
@@ -13,7 +14,7 @@ export const getOrdersWithProducts = async () => {
 
   if (error) throw new Error(error.message)
 
-  return data
+  return data as OrdersWithProducts[]
 }
 
 export const updateOrderStatus = async (orderId: number, status: string) => {
