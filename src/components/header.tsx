@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { CircleUser, Menu, Moon, Package2, Search, Sun } from 'lucide-react'
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { CircleUser, Menu, Moon, Package2, Search, Sun } from "lucide-react";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,103 +12,149 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
-import { useTheme } from 'next-themes'
-import { createClient } from '@/supabase/client'
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import { createClient } from "@/supabase/client";
+import { ADMIN } from "@/constants/contants";
+import { useState, useEffect } from "react";
 
 const NAV_LINKS = [
-  { href: '/admin/dashboard', label: 'Dashboard' },
-  { href: '/admin/orders', label: 'Orders' },
-  { href: '/admin/products', label: 'Products' },
-  { href: '/admin/categories', label: 'Categories' },
-]
+  { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/products", label: "Products" },
+  { href: "/admin/categories", label: "Categories" },
+];
 
 export const Header = () => {
-  const pathname = usePathname()
-  const { setTheme } = useTheme()
-  const router = useRouter()
-  const supabase = createClient()
+  const pathname = usePathname();
+  const { setTheme } = useTheme();
+  const router = useRouter();
+  const supabase = createClient();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      const { data: authData } = await supabase.auth.getUser();
+
+      if (authData?.user) {
+        setIsLoggedIn(true);
+        const { data } = await supabase
+          .from("users")
+          .select("type")
+          .eq("id", authData.user.id)
+          .single();
+
+        setIsAdmin(data?.type === ADMIN);
+      } else {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+      }
+    };
+
+    checkUserStatus();
+  }, [supabase]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
+  const navLinks = isAdmin
+    ? NAV_LINKS
+    : [{ href: "/admin/dashboard", label: "Dashboard" }];
 
   return (
-    <header className='sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6'>
-      <nav className='hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6'>
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link
-          href='/'
-          className='flex items-center gap-2 text-lg font-semibold md:text-base'
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold md:text-base"
         >
-          <Package2 className='h-6 w-6' />
+          <Package2 className="h-6 w-6" />
         </Link>
-        {NAV_LINKS.map(({ href, label }) => (
+        {navLinks.map(({ href, label }) => (
           <Link
             key={href}
             href={href}
             className={cn(
-              'transition-colors hover:text-foreground text-muted-foreground',
+              "transition-colors hover:text-foreground text-muted-foreground",
               {
-                'text-foreground font-bold': pathname === href,
+                "text-foreground font-bold": pathname === href,
               }
             )}
           >
             {label}
           </Link>
         ))}
+        {!isLoggedIn && (
+          <Link
+            href="/auth"
+            className="transition-colors hover:text-foreground text-muted-foreground"
+          >
+            Log In
+          </Link>
+        )}
       </nav>
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant='outline' size='icon' className='shrink-0 md:hidden'>
-            <Menu className='h-5 w-5' />
-            <span className='sr-only'>Toggle navigation menu</span>
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side='left'>
-          <nav className='grid gap-6 text-lg font-medium'>
+        <SheetContent side="left">
+          <nav className="grid gap-6 text-lg font-medium">
             <Link
-              href='/'
-              className='flex items-center gap-2 text-lg font-semibold'
+              href="/"
+              className="flex items-center gap-2 text-lg font-semibold"
             >
-              <Package2 className='h-6 w-6' />
+              <Package2 className="h-6 w-6" />
             </Link>
-            {NAV_LINKS.map(({ href, label }) => (
+            {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className={cn('hover:text-foreground text-muted-foreground', {
-                  'text-foreground font-bold': pathname === href,
+                className={cn("hover:text-foreground text-muted-foreground", {
+                  "text-foreground font-bold": pathname === href,
                 })}
               >
                 {label}
               </Link>
             ))}
+            {!isLoggedIn && (
+              <Link
+                href="/auth"
+                className="hover:text-foreground text-muted-foreground"
+              >
+                Log In
+              </Link>
+            )}
           </nav>
         </SheetContent>
       </Sheet>
-      <div className='flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4'>
-        <form className='ml-auto flex-1 sm:flex-initial'>
-          <div className='relative'>
-            <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
+      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <form className="ml-auto flex-1 sm:flex-initial">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              type='search'
-              placeholder='Search products...'
-              className='pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]'
+              type="search"
+              placeholder="Search products..."
+              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
             />
           </div>
         </form>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant='secondary' size='icon' className='rounded-full'>
-              <CircleUser className='h-5 w-5' />
-              <span className='sr-only'>Toggle user menu</span>
+            <Button variant="secondary" size="icon" className="rounded-full">
+              <CircleUser className="h-5 w-5" />
+              <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuSeparator />
@@ -116,20 +162,20 @@ export const Header = () => {
             <DropdownMenuItem asChild>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className='w-full' variant='outline' size='icon'>
-                    <Sun className='h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0' />
-                    <Moon className='absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100' />
-                    <span className='sr-only'>Toggle theme</span>
+                  <Button className="w-full" variant="outline" size="icon">
+                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <span className="sr-only">Toggle theme</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align='end'>
-                  <DropdownMenuItem onClick={() => setTheme('light')}>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
                     Light
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('dark')}>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
                     Dark
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('system')}>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
                     System
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -139,5 +185,5 @@ export const Header = () => {
         </DropdownMenu>
       </div>
     </header>
-  )
-}
+  );
+};

@@ -157,37 +157,43 @@ export type Database = {
           }
         ]
       }
-      users: {
+       users: {
         Row: {
-          avatar_url:
-            | string
-            | 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-          full_name: string | null
+          avatar_url: string
+          created_at: string | null
+          email: string
+          expo_notification_token: string | null
           id: string
-          updated_at: string | null
-          username: string | null
-          website: string | null
-          type: 'ADMIN' | 'USER'
+          stripe_customer_id: string | null
+          type: string | null
         }
         Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
+          avatar_url: string
+          created_at?: string | null
+          email: string
+          expo_notification_token?: string | null
           id: string
-          updated_at?: string | null
-          username?: string | null
-          website?: string | null
-          type: 'ADMIN' | 'USER'
+          stripe_customer_id?: string | null
+          type?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          full_name?: string | null
+          avatar_url?: string
+          created_at?: string | null
+          email?: string
+          expo_notification_token?: string | null
           id?: string
-          updated_at?: string | null
-          username?: string | null
-          website?: string | null
-          type: 'ADMIN' | 'USER'
+          stripe_customer_id?: string | null
+          type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
